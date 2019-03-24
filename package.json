@@ -1,0 +1,34 @@
+{
+  "name": "less2scss",
+  "version": "1.0.1",
+  "description": "This utility quickly converts all your less files to scss.",
+  "main": "./lib/main",
+  "bin": {
+    "less2scss": "bin/less2scss"
+  },
+  "author": "Andrea Debernardi",
+  "license": "ISC",
+  "engines": {
+    "node": "*"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/debba/less2scss.git"
+  },
+  "keywords": [
+    "less",
+    "scss",
+    "convertor"
+  ],
+  "bugs": {
+    "url": "https://github.com/debbba/less2scss/issues"
+  },
+  "homepage": "https://www.debbaweb.it",
+  "dependencies": {
+    "mkdirp": "^0.5.1",
+    "underscore": "^1.9.1"
+  }
+}
