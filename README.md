@@ -1,3 +1,6 @@
+[![NPM](https://nodei.co/npm/less2scss.png)](https://nodei.co/npm/less2scss.png/)
+[![npm version](https://badge.fury.io/js/less2scss.svg)](https://badge.fury.io/js/less2scss)
+
 less2scss
 -------------------
 
@@ -10,18 +13,24 @@ Installation
 
 Install it via npm:
 
-```sh	
-npm install -g less2scss
+```	
+$ npm install -g less2scss
 ```
 Usage
 ------
 Go to your terminal and type the following:
-```sh
->less2scss path1,path2,path3 [destinationFolder]
+```
+$ less2scss -s path1,path2,path3 -d [destinationFolder]
 ```
 Paths could be a mixture of SCSS files and directories.
 
 It will convert all of the scss files of the corresponding paths provided and will store the SCSS files in the destinationFolder if it's provided or in the same directory.
+
+Notice
+--------
+Be careful, something may not be converted properly.
+
+It's an automatic conversion tool, you can fix errors manually later.
 
 Credits
 --------
@@ -35,3 +44,5 @@ tarun29061990 .
 License
 --------
 less2scss is licensed under : The Apache Software License, Version 2.0. You can find a copy of the license (http://www.apache.org/licenses/LICENSE-2.0.txt)
+
+Enjoy ;)

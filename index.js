@@ -3,6 +3,41 @@ const fs = require('fs'),
     _ = require('underscore'),
     mkdirp = require('mkdirp');
 
+const less2scss = (src, dst) => {
+    if (src){
+        const pathList = src.split(",");
+        pathList.forEach(beginPath => {
+
+            beginPath && beginPath.trim();
+
+            /**
+             * Resolve ~ with NodeJs
+             */
+
+            if (beginPath[0] === '~') {
+                beginPath = path.join(process.env.HOME, beginPath.slice(1));
+            }
+
+            let curPathType = fs.lstatSync(beginPath),
+                lessFiles = [],
+                destinationPath = dst;
+
+            if (curPathType.isDirectory()) {
+                lessFiles = getFileList(beginPath, ".less");
+            }
+
+            if (curPathType.isFile()) {
+                lessFiles.push(beginPath);
+            }
+
+            lessFiles.length && init(lessFiles, beginPath, destinationPath);
+
+        });
+    } else {
+        console.log("No file entered.");
+    }
+};
+
 const getFileList = (fromPath, validExt = ".less") => {
 
     let results = [];
@@ -24,46 +59,11 @@ const getFileList = (fromPath, validExt = ".less") => {
     return results;
 };
 
-const beginConversion = () => {
-    if (process.argv.length > 1 && process.argv[2] !== null) {
-        const pathList = process.argv[2].split(",");
-        pathList.forEach(beginPath => {
-
-            beginPath && beginPath.trim();
-
-            /**
-             * Resolve ~ with NodeJs
-             */
-
-            if (beginPath[0] === '~') {
-                beginPath = path.join(process.env.HOME, beginPath.slice(1));
-            }
-
-            let curPathType = fs.lstatSync(beginPath),
-                lessFiles = [],
-                destinationPath = process.argv[3] || beginPath;
-
-            if (curPathType.isDirectory()) {
-                lessFiles = getFileList(beginPath, ".less");
-            }
-
-            if (curPathType.isFile()) {
-                lessFiles.push(beginPath);
-            }
-
-            lessFiles.length && init(lessFiles, beginPath, destinationPath);
-
-        });
-    } else {
-        console.log("No file entered.");
-    }
-};
-
 const init = (lessFiles, beginPath, destinationPath) => {
     lessFiles.forEach((file) => {
         replaceLess(file, beginPath, destinationPath);
     });
-    console.log("Enjoy your SCSS files.");
+    console.log("Enjoy your SCSS files ;)");
 };
 
 const replaceLess = (file, beginPath, destinationPath) => {
@@ -165,4 +165,4 @@ const makeFile = (file, scssContent, beginPath, destinationPath) => {
 
 };
 
-exports.convert = beginConversion;
+module.exports = less2scss;

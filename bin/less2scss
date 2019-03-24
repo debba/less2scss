@@ -1,8 +1,29 @@
 #!/usr/bin/env node
 
 "use strict";
-var path = require('path');
-var fs = require('fs');
-var lib = path.join(path.dirname(fs.realpathSync(__filename)), '../lib');
+const commander = require('commander');
+const version = require('../package.json').version;
+const less2scss = require('../index.js');
 
-require(lib+'/main.js').convert();
+commander
+    .version(version)
+    .description('This utility quickly converts all your less files to scss.')
+    .option('-s, --src <sourcePaths>', 'src')
+    .option('-d, --dst <dstPath>', 'dst')
+    .parse(process.argv);
+
+const exec = () => {
+    if (commander.src){
+
+        const src = commander.src,
+            dst = commander.dst || commander.src;
+
+        less2scss(src, dst);
+
+    }
+    else {
+        commander.outputHelp();
+    }
+};
+
+exec();

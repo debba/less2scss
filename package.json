@@ -1,8 +1,8 @@
 {
   "name": "less2scss",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "This utility quickly converts all your less files to scss.",
-  "main": "./lib/main",
+  "main": "index.js",
   "bin": {
     "less2scss": "bin/less2scss"
   },
@@ -28,6 +28,7 @@
   },
   "homepage": "https://www.debbaweb.it",
   "dependencies": {
+    "commander": "^2.19.0",
     "mkdirp": "^0.5.1",
     "underscore": "^1.9.1"
   }
