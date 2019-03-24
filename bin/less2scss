@@ -8,8 +8,8 @@ const less2scss = require('../index.js');
 commander
     .version(version)
     .description('This utility quickly converts all your less files to scss.')
-    .option('-s, --src <sourcePaths>', 'src')
-    .option('-d, --dst <dstPath>', 'dst')
+    .option('-s, --src <sourcePaths>', 'source paths comma separated')
+    .option('-d, --dst <dstPath>', 'destination path')
     .parse(process.argv);
 
 const exec = () => {
