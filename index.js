@@ -1,6 +1,5 @@
 const fs = require('fs'),
     path = require('path'),
-    _ = require('underscore'),
     mkdirp = require('mkdirp');
 
 const less2scss = (src, dst) => {
@@ -50,7 +49,7 @@ const getFileList = (fromPath, validExt = ".less") => {
             results.push(...getFileList(file, validExt));
         } else {
             let ext = path.extname(file),
-                validExts = _.isArray(validExt) ? validExt : [validExt];
+                validExts = Array.isArray(validExt) ? validExt : [validExt];
 
             ~validExts.indexOf(ext) && results.push(file);
 
