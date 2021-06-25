@@ -1,10 +1,22 @@
 const fs = require('fs'),
     path = require('path'),
-    mkdirp = require('mkdirp');
+    mkdirp = require('mkdirp'),
+    glob = require('glob'),
+    os = require('os'),
+    colors = require('colors/safe');
+
+const MESSAGE_PREFIX = {
+    INFO: colors.yellow('[INFO]'),
+    WARNING: colors.brightRed.bold('[WARNING]'),
+    ERROR: colors.red.bold('[ERROR]'),
+}
 
 const less2scss = (src, dst) => {
-    if (src){
-        const pathList = src.split(",");
+    if (src) {
+        const pathList = src.split(',');
+        let lessFiles = [],
+            destinationPath = dst;
+
         pathList.forEach(beginPath => {
 
             beginPath && beginPath.trim();
@@ -14,63 +26,43 @@ const less2scss = (src, dst) => {
              */
 
             if (beginPath[0] === '~') {
-                beginPath = path.join(process.env.HOME, beginPath.slice(1));
+                beginPath = path.join(os.homedir(), beginPath.slice(1));
             }
 
-            let curPathType = fs.lstatSync(beginPath),
-                lessFiles = [],
-                destinationPath = dst;
+            beginPath = path.resolve(beginPath);
+
+            let curPathType = fs.lstatSync(beginPath);
 
             if (curPathType.isDirectory()) {
-                lessFiles = getFileList(beginPath, ".less");
+                lessFiles = glob.sync(`${beginPath}/*.less`);
             }
 
             if (curPathType.isFile()) {
                 lessFiles.push(beginPath);
             }
 
-            lessFiles.length && init(lessFiles, beginPath, destinationPath);
-
         });
+
+        if (lessFiles.length) {
+            lessFiles.forEach(file => {
+                const scssContent = replaceLess(file);
+                writeFile(file, scssContent, destinationPath);
+            });
+            console.log(`${MESSAGE_PREFIX.INFO} ${colors.green('Enjoy your SCSS files ;)')}`);
+        } else {
+            console.log(`${MESSAGE_PREFIX.ERROR} ${colors.red.bold('No LESS file found.')}`);
+        }
     } else {
-        console.log("No file entered.");
+        console.log(`${MESSAGE_PREFIX.ERROR} ${colors.red.bold('No file entered.')}`);
     }
 };
 
-const getFileList = (fromPath, validExt = ".less") => {
-
-    let results = [];
-    const list = fs.readdirSync(fromPath);
-
-    list.forEach(function (file) {
-        file = fromPath + '/' + file;
-        let stat = fs.statSync(file);
-        if (stat && stat.isDirectory()) {
-            results.push(...getFileList(file, validExt));
-        } else {
-            let ext = path.extname(file),
-                validExts = Array.isArray(validExt) ? validExt : [validExt];
-
-            ~validExts.indexOf(ext) && results.push(file);
-
-        }
-    });
-    return results;
-};
-
-const init = (lessFiles, beginPath, destinationPath) => {
-    lessFiles.forEach((file) => {
-        replaceLess(file, beginPath, destinationPath);
-    });
-    console.log("Enjoy your SCSS files ;)");
-};
-
-const replaceLess = (file, beginPath, destinationPath) => {
-    let content = fs.readFileSync(file, "utf8");
-    const scssContent = content.replace(/\/less\//g, '/scss/')
+const replaceLess = file => {
+    let content = fs.readFileSync(file, 'utf8');
+    let transformedContent = content.replace(/\/less\//g, '/scss/')
         .replace(/\.less/g, '.scss')
         .replace(/@/g, '$')
-        .replace(/\%\((.*?)\);/g,function(all){
+        .replace(/\%\((.*?)\);/g, function (all) {
             let arr = all.match(/argb\(.*?\)/g);
             if (arr instanceof Array) {
                 for (let i = 0, n = arr.length; i < n; i++) {
@@ -89,79 +81,69 @@ const replaceLess = (file, beginPath, destinationPath) => {
         .replace(/ e\(/g, ' unquote(')
         .replace(/\.([\w\-]*)\s*\((.*)\)\s*\{/g, '@mixin $1($2){')
         .replace(/@mixin\s*([\w\-]*)\s*\((.*)\)\s*\{\s*\}/g, '// @mixin $1($2){}')
-        .replace(/@mixin\s*([\w\-]*)\s*\((.*);(.*)\)/g,function(all){
-            all = all.replace(/;/g,',');
+        .replace(/@mixin\s*([\w\-]*)\s*\((.*);(.*)\)/g, function (all) {
+            all = all.replace(/;/g, ',');
             return all;
         })
         .replace(/(\s)\.(hook[a-zA-Z\-\d]+);/g, '$1@include $2();')
-        .replace(/(\s)\.([\w\-]*)\s*\((.*)\);*/g,'$1@include $2($3);')
-        .replace(/(\s)\.([^\d\s\"]+);/g,'$1@include $2;')
-        .replace(/@include\s*([\w\-]*)\s*\((.*);(.*)\)/g,function(all){
-            all = all.replace(/;/g,',');
+        .replace(/(\s)\.([\w\-]*)\s*\((.*)\);*/g, '$1@include $2($3);')
+        .replace(/(\s)\.([^\d\s\"]+);/g, '$1@include $2;')
+        .replace(/@include\s*([\w\-]*)\s*\((.*);(.*)\)/g, function (all) {
+            all = all.replace(/;/g, ',');
             return all;
         })
-        .replace(/\).*?;!important/," !important)")
+        .replace(/\).*?;!important/, " !important)")
         .replace(/\$(import|charset|media|font-face|page[\s:]|-ms-viewport|keyframes|-webkit-keyframes|-moz-keyframes|-o-keyframes|-moz-document)/g, '@$1')
         .replace(/\$\{/g, '#{$')
         .replace(/~("[^"]+")/g, 'unquote($1)')
-        .replace(/&:extend\((.*?)\)/g,"@extend $1")
-        .replace(/@extend\s*(.*?)\s*?all;/g,"@extend $1;")
-        .replace(/([\W])spin\(/g,'$1adjust-hue(')
-        .replace(/(\W)fade\(([^)]+?)% *\)/g,'$1rgba($2%/100.0%)')
-        .replace(/(\W)fade\(/g,'$1rgba(')
-        .replace(/~(\s*['"])/g,'$1')
-        .replace(/(.[\w\-]+?)&/g,"$1 &")
-        .replace(/#([\w\-]*)\s*\{([^\}]*@mixin[\s\S]*)\}/g,function(all,$1,$2){
-            all = all.replace(/#[\w\-]*\s*\{([^\}]*@mixin[\s\S]*)\}/,"$1");
-            all = all.replace(/@mixin\s*([\w\-]*)/g,"@mixin "+$1+"_$1");
+        .replace(/&:extend\((.*?)\)/g, "@extend $1")
+        .replace(/@extend\s*(.*?)\s*?all;/g, "@extend $1;")
+        .replace(/([\W])spin\(/g, '$1adjust-hue(')
+        .replace(/(\W)fade\(([^)]+?)% *\)/g, '$1rgba($2%/100.0%)')
+        .replace(/(\W)fade\(/g, '$1rgba(')
+        .replace(/~(\s*['"])/g, '$1')
+        .replace(/(.[\w\-]+?)&/g, "$1 &")
+        .replace(/#([\w\-]*)\s*\{([^\}]*@mixin[\s\S]*)\}/g, function (all, $1, $2) {
+            all = all.replace(/#[\w\-]*\s*\{([^\}]*@mixin[\s\S]*)\}/, "$1");
+            all = all.replace(/@mixin\s*([\w\-]*)/g, "@mixin " + $1 + "_$1");
             return all;
         })
-        .replace(/#([\w\-]*)\s*>\s@include\s([\w\-]*)\((.*)\);/g,"@include $1_$2($3);")
-        .replace(/&(&+)/g, function(match, p1){return "&" + p1.replace(/&/g,"#{&}")});
-    makeFile(file, scssContent, beginPath, destinationPath);
+        .replace(/#([\w\-]*)\s*>\s@include\s([\w\-]*)\((.*)\);/g, "@include $1_$2($3);")
+        .replace(/&(&+)/g, function (match, p1) {
+            return "&" + p1.replace(/&/g, "#{&}")
+        });
+
+    // rewrite some built-in functions
+    const mathBuiltInFunctions = ['pow','ceil','floor','round','min','max','abs','sqrt','sin','cos'];
+    const regexMathBuiltIn = new RegExp(`\\b(${mathBuiltInFunctions.join('|')})\\(`, 'g');
+    if (regexMathBuiltIn.test(transformedContent)) {
+        transformedContent = '@use "sass:math";\n' + transformedContent.replaceAll(regexMathBuiltIn, (match, p1, index, input) => {
+            console.log(`${MESSAGE_PREFIX.WARNING} There is math built-in function "${colors.bold(p1)}" check if rewrite is correct.\nFile ${file}:${input.substring(0, index).split('\n').length + 1}`)
+
+            return `math.${match}`;
+        });
+    }
+
+    return transformedContent;
 };
 
-const makeFile = (file, scssContent, beginPath, destinationPath) => {
+const writeFile = (file, scssContent, destinationPath) => {
 
-    const isFile = (file === beginPath),
-        samePath = (beginPath === destinationPath);
+    let outputFile;
 
-    if (!samePath){
-        if (!fs.existsSync(destinationPath)){
+    if (destinationPath) {
+        if (!fs.existsSync(destinationPath)) {
             mkdirp.sync(destinationPath);
         }
+
+        outputFile = path.resolve(destinationPath, path.basename(file)).replace('.less', '.scss');
+    } else {
+        outputFile = file.replace('.less', '.scss')
     }
 
-    let fileBaseName = path.basename(file);
+    fs.writeFileSync(outputFile, scssContent);
 
-    if (isFile || !samePath){
-
-        if (!isFile){
-            destinationPath = path.dirname(
-                file.replace(beginPath, destinationPath)
-            );
-
-            if (!fs.existsSync(destinationPath)){
-                mkdirp.sync(destinationPath);
-            }
-
-        }
-
-        if (!samePath)
-            destinationPath+="/"+fileBaseName;
-
-    }
-    else {
-        destinationPath+="/"+fileBaseName;
-    }
-
-
-    destinationPath = destinationPath.replace(".less", ".scss");
-
-    fs.writeFileSync(destinationPath, scssContent);
-
-    console.log("Finished writing to "+destinationPath);
-
+    console.log(`${colors.yellow('[INFO]')} Finished writing to ${outputFile}`);
 };
 
 module.exports = less2scss;

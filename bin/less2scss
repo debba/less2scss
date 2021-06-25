@@ -13,10 +13,11 @@ commander
     .parse(process.argv);
 
 const exec = () => {
-    if (commander.src){
+    const opts = commander.opts();
+    if (opts.src){
 
-        const src = commander.src,
-            dst = commander.dst || commander.src;
+        const src = opts.src,
+            dst = opts.dst;
 
         less2scss(src, dst);
 
