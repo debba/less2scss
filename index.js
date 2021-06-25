@@ -2,7 +2,14 @@ const fs = require('fs'),
     path = require('path'),
     mkdirp = require('mkdirp'),
     glob = require('glob'),
-    os = require('os');
+    os = require('os'),
+    colors = require('colors/safe');
+
+const MESSAGE_PREFIX = {
+    INFO: colors.yellow('[INFO]'),
+    WARNING: colors.brightRed.bold('[WARNING]'),
+    ERROR: colors.red.bold('[ERROR]'),
+}
 
 const less2scss = (src, dst) => {
     if (src) {
@@ -41,18 +48,18 @@ const less2scss = (src, dst) => {
                 const scssContent = replaceLess(file);
                 writeFile(file, scssContent, destinationPath);
             });
-            console.log('Enjoy your SCSS files ;)');
+            console.log(`${MESSAGE_PREFIX.INFO} ${colors.green('Enjoy your SCSS files ;)')}`);
         } else {
-            console.log('No LESS file found.')
+            console.log(`${MESSAGE_PREFIX.ERROR} ${colors.red.bold('No LESS file found.')}`);
         }
     } else {
-        console.log('No file entered.');
+        console.log(`${MESSAGE_PREFIX.ERROR} ${colors.red.bold('No file entered.')}`);
     }
 };
 
 const replaceLess = file => {
     let content = fs.readFileSync(file, 'utf8');
-    return content.replace(/\/less\//g, '/scss/')
+    let transformedContent = content.replace(/\/less\//g, '/scss/')
         .replace(/\.less/g, '.scss')
         .replace(/@/g, '$')
         .replace(/\%\((.*?)\);/g, function (all) {
@@ -105,6 +112,19 @@ const replaceLess = file => {
         .replace(/&(&+)/g, function (match, p1) {
             return "&" + p1.replace(/&/g, "#{&}")
         });
+
+    // rewrite some built-in functions
+    const mathBuiltInFunctions = ['pow','ceil','floor','round','min','max','abs','sqrt','sin','cos'];
+    const regexMathBuiltIn = new RegExp(`\\b(${mathBuiltInFunctions.join('|')})\\(`, 'g');
+    if (regexMathBuiltIn.test(transformedContent)) {
+        transformedContent = '@use "sass:math";\n' + transformedContent.replaceAll(regexMathBuiltIn, (match, p1, index, input) => {
+            console.log(`${MESSAGE_PREFIX.WARNING} There is math built-in function "${colors.bold(p1)}" check if rewrite is correct.\nFile ${file}:${input.substring(0, index).split('\n').length + 1}`)
+
+            return `math.${match}`;
+        });
+    }
+
+    return transformedContent;
 };
 
 const writeFile = (file, scssContent, destinationPath) => {
@@ -123,7 +143,7 @@ const writeFile = (file, scssContent, destinationPath) => {
 
     fs.writeFileSync(outputFile, scssContent);
 
-    console.log('Finished writing to ' + outputFile);
+    console.log(`${colors.yellow('[INFO]')} Finished writing to ${outputFile}`);
 };
 
 module.exports = less2scss;
