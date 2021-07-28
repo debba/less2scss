@@ -3,7 +3,8 @@ const fs = require('fs'),
     mkdirp = require('mkdirp'),
     glob = require('glob'),
     os = require('os'),
-    colors = require('colors/safe');
+    colors = require('colors/safe'),
+    replaceAll = require('string.prototype.replaceall');
 
 const MESSAGE_PREFIX = {
     INFO: colors.yellow('[INFO]'),
@@ -114,12 +115,11 @@ const replaceLess = file => {
         });
 
     // rewrite some built-in functions
-    const mathBuiltInFunctions = ['pow','ceil','floor','round','min','max','abs','sqrt','sin','cos'];
+    const mathBuiltInFunctions = ['pow', 'ceil', 'floor', 'round', 'min', 'max', 'abs', 'sqrt', 'sin', 'cos'];
     const regexMathBuiltIn = new RegExp(`\\b(${mathBuiltInFunctions.join('|')})\\(`, 'g');
     if (regexMathBuiltIn.test(transformedContent)) {
-        transformedContent = '@use "sass:math";\n' + transformedContent.replaceAll(regexMathBuiltIn, (match, p1, index, input) => {
+        transformedContent = '@use "sass:math";\n' + replaceAll(transformedContent, regexMathBuiltIn, (match, p1, index, input) => {
             console.log(`${MESSAGE_PREFIX.WARNING} There is math built-in function "${colors.bold(p1)}" check if rewrite is correct.\nFile ${file}:${input.substring(0, index).split('\n').length + 1}`)
-
             return `math.${match}`;
         });
     }
