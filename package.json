@@ -1,6 +1,6 @@
 {
   "name": "less2scss",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "This utility quickly converts all your less files to scss.",
   "main": "index.js",
   "bin": {
@@ -9,7 +9,7 @@
   "author": "Andrea Debernardi",
   "license": "ISC",
   "engines": {
-    "node": ">=15"
+    "node": ">=14"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
