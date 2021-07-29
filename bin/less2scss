@@ -8,8 +8,9 @@ const less2scss = require('../index.js');
 commander
     .version(version)
     .description('This utility quickly converts all your less files to scss.')
-    .option('-s, --src <sourcePaths>', 'source paths comma separated')
+    .option('-s, --src <sourcePaths>', 'comma separated source paths')
     .option('-d, --dst <dstPath>', 'destination path')
+    .option('-r, --recursive', 'allow to recursively walk directories', false)
     .parse(process.argv);
 
 const exec = () => {
@@ -17,9 +18,10 @@ const exec = () => {
     if (opts.src){
 
         const src = opts.src,
-            dst = opts.dst;
+            dst = opts.dst,
+            recursive = opts.recursive
 
-        less2scss(src, dst);
+        less2scss(src, dst, recursive);
 
     }
     else {

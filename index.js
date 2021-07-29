@@ -10,10 +10,14 @@ const MESSAGE_PREFIX = {
     INFO: colors.yellow('[INFO]'),
     WARNING: colors.brightRed.bold('[WARNING]'),
     ERROR: colors.red.bold('[ERROR]'),
-}
+};
 
-const less2scss = (src, dst) => {
+
+const less2scss = (src, dst, recursive) => {
     if (src) {
+
+        console.info(`${MESSAGE_PREFIX.INFO} ${colors.yellow(`Recursive option is ${colors.yellow.bold(recursive ? 'ON' : 'OFF')}`)}`);
+
         const pathList = src.split(',');
         let lessFiles = [],
             destinationPath = dst;
@@ -21,10 +25,6 @@ const less2scss = (src, dst) => {
         pathList.forEach(beginPath => {
 
             beginPath && beginPath.trim();
-
-            /**
-             * Resolve ~ with NodeJs
-             */
 
             if (beginPath[0] === '~') {
                 beginPath = path.join(os.homedir(), beginPath.slice(1));
@@ -35,21 +35,38 @@ const less2scss = (src, dst) => {
             let curPathType = fs.lstatSync(beginPath);
 
             if (curPathType.isDirectory()) {
-                lessFiles = glob.sync(`${beginPath}/*.less`);
+                lessFiles = [...lessFiles, ...glob
+                    .sync(`${beginPath}/${recursive ? '**/*' : '*'}.less`)
+                    .map(lessFile => ({
+                        src: lessFile,
+                        relativePath: path.relative(beginPath, lessFile)
+                    }))];
             }
 
             if (curPathType.isFile()) {
-                lessFiles.push(beginPath);
+                lessFiles = [...lessFiles, {
+                    src: beginPath,
+                    relativePath: ''
+                }];
             }
 
         });
 
+        lessFiles = lessFiles
+            .filter(
+                ({src}, index) => lessFiles.map(lessFile => lessFile.src).indexOf(src) === index
+            );
+
         if (lessFiles.length) {
             lessFiles.forEach(file => {
-                const scssContent = replaceLess(file);
-                writeFile(file, scssContent, destinationPath);
+                const {src, relativePath} = file;
+                const scssContent = replaceLess(src);
+                writeFile(src, scssContent, destinationPath, relativePath);
             });
             console.log(`${MESSAGE_PREFIX.INFO} ${colors.green('Enjoy your SCSS files ;)')}`);
+            console.log(`${colors.blue(`\n★ Pull requests and stars are always welcome.`)}`);
+            console.log(`${colors.blue(`https://github.com/debba/less2scss`)}`);
+
         } else {
             console.log(`${MESSAGE_PREFIX.ERROR} ${colors.red.bold('No LESS file found.')}`);
         }
@@ -127,18 +144,22 @@ const replaceLess = file => {
     return transformedContent;
 };
 
-const writeFile = (file, scssContent, destinationPath) => {
+const writeFile = (file, scssContent, destinationPath, relativePath) => {
 
     let outputFile;
 
     if (destinationPath) {
-        if (!fs.existsSync(destinationPath)) {
-            mkdirp.sync(destinationPath);
+
+        const newPath = relativePath !== '' ? path.dirname( destinationPath+'/'+relativePath ) : destinationPath;
+
+        if (!fs.existsSync(newPath)) {
+            mkdirp.sync(newPath);
         }
 
-        outputFile = path.resolve(destinationPath, path.basename(file)).replace('.less', '.scss');
+        outputFile = path.resolve(newPath, path.basename(file)).replace('.less', '.scss');
     } else {
-        outputFile = file.replace('.less', '.scss')
+        outputFile = file.replace('.less', '.scss');
+        console.log(outputFile);
     }
 
     fs.writeFileSync(outputFile, scssContent);

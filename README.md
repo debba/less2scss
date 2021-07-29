@@ -8,23 +8,48 @@ This npm package will convert all your less files to scss.
 
 You can provide an entire folder, this package will scan all less files whose find in subfolders and it'll create SCSS files in the same folder or in the new directory provided recreating the source hierarchy. 
 
-Installation
+Install
 -------------
 
 Install it via npm:
 
-```	
-$ npm install -g less2scss
+```bash
+$ npm install less2scss --global
 ```
 Usage
 ------
-Go to your terminal and type the following:
-```
-$ less2scss -s path1,path2,path3 -d [destinationFolder]
-```
-Paths could be a mixture of SCSS files and directories.
+`less2scss` offers a single command line interface:
 
-It will convert all of the scss files of the corresponding paths provided and will store the SCSS files in the destinationFolder if it's provided or in the same directory.
+```bash
+$ less2scss
+```
+
+Will print an help:
+
+
+```
+Usage: less2scss [options]
+
+This utility quickly converts all your less files to scss.
+
+Options:
+  -V, --version            output the version number
+  -s, --src <sourcePaths>  source paths comma separated
+  -d, --dst <dstPath>      destination path
+  -r, --recursive          allow to recursively walk directories (default: false)
+  -h, --help               display help for command
+```
+
+Options
+--------
+You can pass the following options via CLI arguments.
+
+| Description                                                                                                                             | Short command | Full command       | Mandatory | Default value |
+| --------------------------------------------------------------------------------------------------------------------------------------- | ------------- | ------------------ | ------------------ | ------------------ |
+| Comma separated LESS files and paths                                                                                                    | `-s`          | `--src`            | Yes | - |
+| Destination path for converted SCSS files (if provided). If not provided, it will be the same directory                                                          | `-d`          | `--dst` | No |   Same directory of files provided      |
+| Allow to recursively walk directories                                                          | `-r`          | `--recursive`            | No | false |
+
 
 Notice
 --------
@@ -40,6 +65,10 @@ Some convertion rules are inspired by:
 - [Gulp Less to Scss](https://github.com/steelydylan/gulp-less-to-scss]) by steelydylan .
 - [Less Scss Convertor](https://github.com/tarun29061990/less-scss-convertor) by 
 tarun29061990 .
+
+Contributing
+--------
+If you have suggestions for enhancements or ideas for new features that could be useful, please open a pull request or open an issue.
 
 License
 --------
