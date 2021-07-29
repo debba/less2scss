@@ -10,6 +10,7 @@ commander
     .description('This utility quickly converts all your less files to scss.')
     .option('-s, --src <sourcePaths>', 'comma separated source paths')
     .option('-d, --dst <dstPath>', 'destination path')
+    .option('-e, --exclude <excludePaths>', 'comma separated exclude paths')
     .option('-r, --recursive', 'allow to recursively walk directories', false)
     .parse(process.argv);
 
@@ -19,9 +20,10 @@ const exec = () => {
 
         const src = opts.src,
             dst = opts.dst,
-            recursive = opts.recursive
+            recursive = opts.recursive,
+            exclude = opts.exclude;
 
-        less2scss(src, dst, recursive);
+        less2scss(src, dst, recursive, exclude);
 
     }
     else {

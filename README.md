@@ -26,18 +26,18 @@ $ less2scss
 
 Will print an help:
 
-
 ```
 Usage: less2scss [options]
 
 This utility quickly converts all your less files to scss.
 
 Options:
-  -V, --version            output the version number
-  -s, --src <sourcePaths>  source paths comma separated
-  -d, --dst <dstPath>      destination path
-  -r, --recursive          allow to recursively walk directories (default: false)
-  -h, --help               display help for command
+-V, --version                 output the version number
+-s, --src <sourcePaths>       comma separated source paths
+-d, --dst <dstPath>           destination path
+-e, --exclude <excludePaths>  comma separated exclude paths
+-r, --recursive               allow to recursively walk directories (default: false)
+-h, --help                    display help for command
 ```
 
 Options
@@ -48,8 +48,31 @@ You can pass the following options via CLI arguments.
 | --------------------------------------------------------------------------------------------------------------------------------------- | ------------- | ------------------ | ------------------ | ------------------ |
 | Comma separated LESS files and paths                                                                                                    | `-s`          | `--src`            | Yes | - |
 | Destination path for converted SCSS files (if provided). If not provided, it will be the same directory                                                          | `-d`          | `--dst` | No |   Same directory of files provided      |
+| Comma separated exclude paths                                                        | `-e`          | `--exclude`            | No | - |
 | Allow to recursively walk directories                                                          | `-r`          | `--recursive`            | No | false |
 
+**Note:**
+
+For excluding files and path we use [ignore](https://www.npmjs.com/package/ignore) package.
+
+_`ignore` is a manager, filter and parser which implemented in pure JavaScript according to the .gitignore spec 2.22.1.
+
+**All paths provided must be relative to the source path**
+
+Examples
+--------
+
+#### Convert LESS files inside a folder excluding `node_modules` and `vendor` subfolders.
+
+```bash
+$ less2scss -s ./less_folder  -d ./scss_folder -r -e 'node_modules,vendor'
+```
+
+#### Convert LESS files inside a folder excluding all subfolders whose name begins with `test`.
+
+```bash
+$ less2scss -s ./less_folder  -d ./scss_folder -r -e 'node_modules,vendor'
+```
 
 Notice
 --------

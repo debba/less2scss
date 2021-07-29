@@ -5,6 +5,7 @@ const fs = require('fs'),
     os = require('os'),
     colors = require('colors/safe'),
     replaceAll = require('string.prototype.replaceall');
+const ignore = require("ignore");
 
 const MESSAGE_PREFIX = {
     INFO: colors.yellow('[INFO]'),
@@ -13,14 +14,18 @@ const MESSAGE_PREFIX = {
 };
 
 
-const less2scss = (src, dst, recursive) => {
+const less2scss = (src, dst, recursive, exclude) => {
     if (src) {
 
-        console.info(`${MESSAGE_PREFIX.INFO} ${colors.yellow(`Recursive option is ${colors.yellow.bold(recursive ? 'ON' : 'OFF')}`)}`);
+        const pathList = src.split(','),
+            excludedPaths = exclude && exclude.length > 0 ? exclude.split(',') : [];
 
-        const pathList = src.split(',');
         let lessFiles = [],
             destinationPath = dst;
+
+        console.info(`${MESSAGE_PREFIX.INFO} ${colors.yellow(`Recursive option is ${colors.yellow.bold(recursive ? 'ON' : 'OFF')}`)}`);
+        console.info(`${MESSAGE_PREFIX.INFO} ${colors.yellow(`Excluded paths: ${excludedPaths.length}`)}`);
+
 
         pathList.forEach(beginPath => {
 
@@ -31,16 +36,27 @@ const less2scss = (src, dst, recursive) => {
             }
 
             beginPath = path.resolve(beginPath);
-
             let curPathType = fs.lstatSync(beginPath);
 
             if (curPathType.isDirectory()) {
-                lessFiles = [...lessFiles, ...glob
-                    .sync(`${beginPath}/${recursive ? '**/*' : '*'}.less`)
-                    .map(lessFile => ({
-                        src: lessFile,
-                        relativePath: path.relative(beginPath, lessFile)
-                    }))];
+
+                let currLessFiles = ignore()
+                    .add(excludedPaths).filter(
+                        glob.sync(`${beginPath}/${recursive ? '**/*' : '*'}.less`, {
+                            mark: true,
+                            onlyFiles: true
+                        }).map(
+                            p => path.relative(beginPath, p)
+                        )
+                    ).map(
+                        lessFile => ({
+                            src: path.join(beginPath, lessFile),
+                            relativePath: lessFile
+                        })
+                    )
+
+                lessFiles = [...lessFiles, ...currLessFiles];
+
             }
 
             if (curPathType.isFile()) {
@@ -150,7 +166,7 @@ const writeFile = (file, scssContent, destinationPath, relativePath) => {
 
     if (destinationPath) {
 
-        const newPath = relativePath !== '' ? path.dirname( destinationPath+'/'+relativePath ) : destinationPath;
+        const newPath = relativePath !== '' ? path.dirname(destinationPath + '/' + relativePath) : destinationPath;
 
         if (!fs.existsSync(newPath)) {
             mkdirp.sync(newPath);
