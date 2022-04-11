@@ -146,7 +146,7 @@ const replaceLess = file => {
         .replace(/&(&+)/g, function (match, p1) {
             return "&" + p1.replace(/&/g, "#{&}")
         })
-        .replace(/\\@import +\( *css *\) +url/, '@import url');
+        .replace(/@import +\( *css *\) +url/g, '@import url');
 
     // rewrite some built-in functions
     const mathBuiltInFunctions = ['pow', 'ceil', 'floor', 'round', 'min', 'max', 'abs', 'sqrt', 'sin', 'cos'];
