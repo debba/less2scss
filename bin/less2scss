@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 "use strict";
-const commander = require('commander');
+const {commander} = require('commander');
 const version = require('../package.json').version;
 const less2scss = require('../index.js');
 
@@ -16,7 +16,7 @@ commander
 
 const exec = () => {
     const opts = commander.opts();
-    if (opts.src){
+    if (opts.src) {
 
         const src = opts.src,
             dst = opts.dst,
@@ -25,8 +25,7 @@ const exec = () => {
 
         less2scss(src, dst, recursive, exclude);
 
-    }
-    else {
+    } else {
         commander.outputHelp();
     }
 };
