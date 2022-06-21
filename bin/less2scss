@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 "use strict";
-const {commander} = require('commander');
+const commander = require('commander');
 const version = require('../package.json').version;
 const less2scss = require('../index.js');
 
