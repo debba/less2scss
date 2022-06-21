@@ -30,7 +30,7 @@
   "dependencies": {
     "colors": "^1.4.0",
     "commander": "^8.1.0",
-    "glob": "^7.1.7",
+    "glob": "^8.0.3",
     "ignore": "^5.1.8",
     "mkdirp": "^1.0.4",
     "string.prototype.replaceall": "^1.0.5"
