@@ -13,6 +13,16 @@ const MESSAGE_PREFIX = {
     ERROR: colors.red.bold('[ERROR]'),
 };
 
+const resolve = (...pathSegments) => {
+    let pathResolved =  path.resolve(...pathSegments);
+
+    if (process.platform === 'win32') {
+        pathResolved = pathResolved.split(path.sep).join("/");
+    }
+
+    return pathResolved;
+}
+
 
 const less2scss = (src, dst, recursive, exclude) => {
     if (src) {
@@ -35,7 +45,7 @@ const less2scss = (src, dst, recursive, exclude) => {
                 beginPath = path.join(os.homedir(), beginPath.slice(1));
             }
 
-            beginPath = path.resolve(beginPath);
+            beginPath = resolve(beginPath);
             let curPathType = fs.lstatSync(beginPath);
 
             if (curPathType.isDirectory()) {
@@ -173,10 +183,9 @@ const writeFile = (file, scssContent, destinationPath, relativePath) => {
             mkdirp.sync(newPath);
         }
 
-        outputFile = path.resolve(newPath, path.basename(file)).replace('.less', '.scss');
+        outputFile = resolve(newPath, path.basename(file)).replace('.less', '.scss');
     } else {
         outputFile = file.replace('.less', '.scss');
-        console.log(outputFile);
     }
 
     fs.writeFileSync(outputFile, scssContent);
