@@ -137,7 +137,7 @@ const replaceLess = file => {
             return all;
         })
         .replace(/\).*?;!important/, " !important)")
-        .replace(/\$(import|charset|media|font-face|page[\s:]|-ms-viewport|keyframes|-webkit-keyframes|-moz-keyframes|-o-keyframes|-moz-document)/g, '@$1')
+        .replace(/\$(import|charset|media|font-face|page[\s:]|-ms-viewport|keyframes|supports|-webkit-keyframes|-moz-keyframes|-o-keyframes|-moz-document)/g, '@$1')
         .replace(/\$\{/g, '#{$')
         .replace(/~("[^"]+")/g, 'unquote($1)')
         .replace(/&:extend\((.*?)\)/g, "@extend $1")
