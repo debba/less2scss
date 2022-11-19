@@ -3,7 +3,7 @@
 "use strict";
 const commander = require('commander');
 const version = require('../package.json').version;
-const less2scss = require('../index.js');
+const less2scss = require('../index.js').less2scss;
 
 commander
     .version(version)

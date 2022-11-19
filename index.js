@@ -86,7 +86,7 @@ const less2scss = (src, dst, recursive, exclude) => {
         if (lessFiles.length) {
             lessFiles.forEach(file => {
                 const {src, relativePath} = file;
-                const scssContent = replaceLess(src);
+                const scssContent = transformFileSync(src);
                 writeFile(src, scssContent, destinationPath, relativePath);
             });
             console.log(`${MESSAGE_PREFIX.INFO} ${colors.green('Enjoy your SCSS files ;)')}`);
@@ -101,8 +101,12 @@ const less2scss = (src, dst, recursive, exclude) => {
     }
 };
 
-const replaceLess = file => {
+const transformFileSync = (file) => {
     let content = fs.readFileSync(file, 'utf8');
+    return transformSync(content, file);
+}
+
+const transformSync = (content, file) => {
     let transformedContent = content.replace(/\/less\//g, '/scss/')
         .replace(/\.less/g, '.scss')
         .replace(/@/g, '$')
@@ -163,7 +167,7 @@ const replaceLess = file => {
     const regexMathBuiltIn = new RegExp(`\\b(${mathBuiltInFunctions.join('|')})\\(`, 'g');
     if (regexMathBuiltIn.test(transformedContent)) {
         transformedContent = '@use "sass:math";\n' + replaceAll(transformedContent, regexMathBuiltIn, (match, p1, index, input) => {
-            console.log(`${MESSAGE_PREFIX.WARNING} There is math built-in function "${colors.bold(p1)}" check if rewrite is correct.\nFile ${file}:${input.substring(0, index).split('\n').length + 1}`)
+            console.log(`${MESSAGE_PREFIX.WARNING} There is math built-in function "${colors.bold(p1)}" check if rewrite is correct.\nFile ${file || '""' }}:${input.substring(0, index).split('\n').length + 1}`)
             return `math.${match}`;
         });
     }
@@ -193,4 +197,8 @@ const writeFile = (file, scssContent, destinationPath, relativePath) => {
     console.log(`${colors.yellow('[INFO]')} Finished writing to ${outputFile}`);
 };
 
-module.exports = less2scss;
+module.exports = {
+    less2scss,
+    transformFileSync,
+    transformSync
+};
