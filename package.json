@@ -11,6 +11,10 @@
   "engines": {
     "node": ">=14"
   },
+  "files": [
+    "bin",
+    "index.js"
+  ],
   "scripts": {
     "test": "ava"
   },
