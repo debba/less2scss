@@ -11,8 +11,12 @@
   "engines": {
     "node": ">=14"
   },
+  "files": [
+    "bin",
+    "index.js"
+  ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "ava"
   },
   "repository": {
     "type": "git",
@@ -34,5 +38,8 @@
     "ignore": "^5.1.8",
     "mkdirp": "^1.0.4",
     "string.prototype.replaceall": "^1.0.5"
+  },
+  "devDependencies": {
+    "ava": "^5.1.0"
   }
 }
