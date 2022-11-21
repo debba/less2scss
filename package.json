@@ -1,6 +1,6 @@
 {
   "name": "less2scss",
-  "version": "1.9.1",
+  "version": "1.9.2",
   "description": "This utility quickly converts all your less files to scss.",
   "main": "index.js",
   "bin": {
