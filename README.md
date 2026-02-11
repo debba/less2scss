@@ -1,6 +1,6 @@
 [![NPM](https://nodei.co/npm/less2scss.png)](https://nodei.co/npm/less2scss.png/)
 [![npm version](https://badge.fury.io/js/less2scss.svg)](https://badge.fury.io/js/less2scss)
-[![Discord](https://img.shields.io/discord/1470772941296894128?color=5865F2&logo=discord&logoColor=white)](https://discord.gg/WgsVw69F)
+[![Discord](https://img.shields.io/discord/1470772941296894128?color=5865F2&logo=discord&logoColor=white)](https://discord.gg/YrZPHAwMSG)
 
 less2scss
 -------------------
@@ -9,7 +9,7 @@ This npm package will convert all your less files to scss.
 
 You can provide an entire folder, this package will scan all less files whose find in subfolders and it'll create SCSS files in the same folder or in the new directory provided recreating the source hierarchy. 
 
-**Discord** - [Join our discord server](https://discord.gg/WgsVw69F) and chat with the maintainers.
+**Discord** - [Join our discord server](https://discord.gg/YrZPHAwMSG) and chat with the maintainers.
 
 Install
 -------------
